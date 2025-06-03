@@ -2,6 +2,7 @@
 #include "Memory/memory.hpp"
 #include "Game/entity.h"
 #include "Globals/globals.h"
+#include "Features/Aimbot/aimbot.h"
 
 class Timer
 {
@@ -39,17 +40,22 @@ int main()
 
 	if (!Globals::hProcess)
 	{
-		std::cout << "failed to open process\n";
-		return 1;
+		std::cout << "failed to find assault cube process\n";
+		return -1;
 	}
 
 	std::array<uintptr_t, 31> entityAddresses;
 	Game::Entity* entities = new Game::Entity[31];
+	Game::Entity myself;
 
+	while (true)
 	{
-		Timer t;
-		Game::populate_array(entityAddresses, entities);
+		Game::UpdateMyself(myself);
+		Game::PopulateArray(entityAddresses, entities);
+		const Game::Entity* blup{ Game::ClosestEntity(entities, myself) };
+		Aimbot::ClosestTarget(*blup, myself);
 	}
+
 
 	delete[] entities;
 	CloseHandle(Globals::hProcess);

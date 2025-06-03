@@ -12,14 +12,15 @@ DWORD Memory::GetProcessId(const char* proc)
 		{
 			if (!_stricmp(proc, procEntry.szExeFile))
 			{
-				break;
+				CloseHandle(snap);
+				return procEntry.th32ProcessID;
 			}
 
 		} while (Process32Next(snap, &procEntry));
 	}
 
 	CloseHandle(snap);
-	return procEntry.th32ProcessID;
+	return 0;
 }
 
 BYTE* Memory::GetModuleBaseAddress(const char* proc, DWORD id = 0)
@@ -35,12 +36,13 @@ BYTE* Memory::GetModuleBaseAddress(const char* proc, DWORD id = 0)
 		{
 			if (!_stricmp(proc, mEntry.szModule))
 			{
-				break;
+				CloseHandle(snap);
+				return mEntry.modBaseAddr;
 			}
 
 		} while (Module32Next(snap, &mEntry));
 	}
 
 	CloseHandle(snap);
-	return mEntry.modBaseAddr;
+	return 0;
 }

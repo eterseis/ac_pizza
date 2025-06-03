@@ -20,5 +20,5 @@ unsigned int Offsets::GetLivingEntities()
 {
 	unsigned int alives;
 	Memory::rpm<unsigned int>(Globals::hProcess, Offsets::living_entities + Globals::module_base, alives);
-	return alives;
+	return alives - 1;
 }

@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Features\Aimbot\aimbot.cpp" />
     <ClCompile Include="Source\Game\entity.cpp" />
     <ClCompile Include="Source\Game\offsets.cpp" />
     <ClCompile Include="Source\main.cpp">
@@ -143,6 +144,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.hpp</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="Source\Math\math.cpp" />
     <ClCompile Include="Source\Memory\memory.cpp" />
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -156,10 +158,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Features\Aimbot\aimbot.h" />
     <ClInclude Include="Source\Game\entity.h" />
     <ClInclude Include="Source\Game\offsets.hpp" />
     <ClInclude Include="Source\Game\vector.h" />
     <ClInclude Include="Source\Globals\globals.h" />
+    <ClInclude Include="Source\Math\math.hpp" />
     <ClInclude Include="Source\Memory\memory.hpp" />
     <ClInclude Include="Source\pch.hpp" />
   </ItemGroup>
