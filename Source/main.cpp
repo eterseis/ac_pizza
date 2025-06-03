@@ -1,26 +1,57 @@
 #include "pch.hpp"
 #include "Memory/memory.hpp"
 #include "Game/entity.h"
-#include <vector>
+#include "Globals/globals.h"
+
+class Timer
+{
+public:
+	Timer()
+	{
+		m_StartTimePoint = std::chrono::high_resolution_clock::now();
+	}
+	~Timer()
+	{
+		Stop();
+	}
+	void Stop()
+	{
+		auto endTimePoint{ std::chrono::high_resolution_clock::now() };
+
+		auto start{ std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimePoint).time_since_epoch().count() };
+		auto end{ std::chrono::time_point_cast<std::chrono::microseconds>(endTimePoint).time_since_epoch().count() };
+
+		auto duration{ end - start };
+		double ms{ duration * 0.001 };
+
+		std::cout << duration << "us (" << ms << "ms)\n";
+	}
+
+private:
+	std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimePoint;
+};
 
 int main()
 {
 	auto procId = Memory::GetProcessId("ac_client.exe");
-	Game::module_base = reinterpret_cast<uintptr_t>(Memory::GetModuleBaseAddress("ac_client.exe", procId));
-	Game::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, procId);
+	Globals::module_base = reinterpret_cast<uintptr_t>(Memory::GetModuleBaseAddress("ac_client.exe", procId));
+	Globals::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, procId);
 
-	if (!Game::hProcess)
+	if (!Globals::hProcess)
 	{
 		std::cout << "failed to open process\n";
 		return 1;
 	}
 
-	std::array<uintptr_t, 31> entities_ptr;
-	std::vector<Game::Entity> entities;
-	entities.resize(31);
+	std::array<uintptr_t, 31> entityAddresses;
+	Game::Entity* entities = new Game::Entity[31];
 
-	Game::populate_array(entities_ptr, entities);
+	{
+		Timer t;
+		Game::populate_array(entityAddresses, entities);
+	}
 
-	CloseHandle(Game::hProcess);
+	delete[] entities;
+	CloseHandle(Globals::hProcess);
 	return 0;
 }

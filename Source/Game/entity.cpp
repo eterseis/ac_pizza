@@ -1,19 +1,20 @@
 #include "entity.h"
 #include "../Memory/memory.hpp"
+#include "../Globals/globals.h"
 #include "offsets.hpp"
 
-void Game::populate_array(std::array<uintptr_t, 31>& ents_ptr, std::vector<Entity>& ents)
+void Game::populate_array(std::array<uintptr_t, 31>& ents_ptr, Entity* ents)
 {
-	uintptr_t entity_list;
-	Memory::rpm<uintptr_t>(Game::hProcess, Offsets::entity_list + Game::module_base, entity_list);
+	uintptr_t entity_list{ Offsets::GetEntityList() };
+	unsigned int living_ents{ Offsets::GetLivingEntities() - 1 };
 
-	Memory::rpm<std::array<uintptr_t, 31>>(Game::hProcess, entity_list, ents_ptr);
+	/* get entity addresses */
+	Memory::rpm_array<std::array<uintptr_t, 31>>(Globals::hProcess, entity_list, ents_ptr, sizeof(uintptr_t) * living_ents);
 
-	int living_ents;
-	Memory::rpm<int>(Game::hProcess, Offsets::living_entities + Game::module_base, living_ents);
-
-	for (int i{}; i < living_ents - 1; ++i)
+	for (unsigned int i{}; i < living_ents; ++i)
 	{
-		Memory::rpm<Entity>(Game::hProcess, ents_ptr[i], ents[i]);
+		Memory::rpm<Entity>(Globals::hProcess, ents_ptr[i], ents[i]);
+		ents[i].dead = ents[i].health < 0;
+		ents[i].address = ents_ptr[i];
 	}
 }

@@ -3,7 +3,6 @@
 #include "vector.h"
 #include <cstdint>
 #include <array>
-#include <vector>
 
 namespace Game
 {
@@ -31,8 +30,5 @@ namespace Game
 		uintptr_t address;
 	};
 
-	inline uintptr_t module_base;
-	inline void* hProcess;
-
-	void populate_array(std::array<uintptr_t, 31>& ents_ptr, std::vector<Entity>& ents);
+	void populate_array(std::array<uintptr_t, 31>& ents_ptr, Entity* ents);
 }
