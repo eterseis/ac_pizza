@@ -36,7 +36,7 @@ int main()
 {
 	auto procId = Memory::GetProcessId("ac_client.exe");
 	Globals::module_base = reinterpret_cast<uintptr_t>(Memory::GetModuleBaseAddress("ac_client.exe", procId));
-	Globals::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, procId);
+	Globals::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | SYNCHRONIZE, false, procId);
 
 	if (!Globals::hProcess)
 	{
@@ -50,6 +50,12 @@ int main()
 
 	while (true)
 	{
+		if (WaitForSingleObject(Globals::hProcess, 0) == WAIT_OBJECT_0)
+		{
+			std::cout << "game has been closed\n";
+			return -1;
+		}
+
 		Game::UpdateMyself(myself);
 		Game::PopulateArray(entityAddresses, entities);
 		const Game::Entity* blup{ Game::ClosestEntity(entities, myself) };
@@ -57,7 +63,7 @@ int main()
 	}
 
 
-	delete[] entities;
 	CloseHandle(Globals::hProcess);
+	delete[] entities;
 	return 0;
 }
