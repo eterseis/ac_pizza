@@ -139,9 +139,7 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 
 		glfwGetWindowSize(window, &v.m_Width, &v.m_Height);
 		{
-			Timer t;
 			v.TestViewMatrix(ents);
-
 		}
 
 		glfwSwapBuffers(window);
