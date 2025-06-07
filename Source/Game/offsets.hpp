@@ -20,8 +20,10 @@ namespace Offsets
 	inline constexpr uintptr_t localplayer{ 0x17E0A8 };
 	inline constexpr uintptr_t entity_list{ 0x191FCC };		/* ENTITY ADDRESS ARRAY */
 	inline constexpr uintptr_t living_entities{ 0x18AC0C }; /* INT */
+	inline constexpr uintptr_t view_matrix{ /* ac_client.exe + */ 0x17DFFC };
 
 	uintptr_t GetEntityList();
 	uintptr_t GetLocalPlayer();
 	unsigned int GetLivingEntities();
+	uintptr_t GetViewMatrix();
 }

@@ -9,10 +9,10 @@ namespace Game
 	struct Entity
 	{
 		uintptr_t vf_table;
-		vec3 head;
+		vec3 vHead;
 
 		char padding[0x28 - 0x10];
-		vec3 feet;
+		vec3 vFeet;
 
 		char padding2[0x44 - 0x34];
 		float yaw;

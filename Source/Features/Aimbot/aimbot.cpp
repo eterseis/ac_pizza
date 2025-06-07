@@ -11,12 +11,12 @@ void Aimbot::ClosestTarget(const Game::Entity& target, const Game::Entity& mysel
 
 	constexpr float pi{ 3.14159265358979323846f };
 
-	float abspos_x = target.head.x - myself.head.x;
-	float abspos_y = target.head.y - myself.head.y;
-	float abspos_z = target.head.z - myself.head.z;
+	float abspos_x = target.vHead.x - myself.vHead.x;
+	float abspos_y = target.vHead.y - myself.vHead.y;
+	float abspos_z = target.vHead.z - myself.vHead.z;
 
 	float azimuth_xy = atan2f(abspos_y, abspos_x);
-	float azimuth_z = atan2f(abspos_z, Math::DistanceFrom(target.head, myself.head));
+	float azimuth_z = atan2f(abspos_z, Math::DistanceFrom(target.vHead, myself.vHead));
 
 	float yaw = (azimuth_xy * (180.0f / pi));
 	yaw += 90.0f;

@@ -6,9 +6,11 @@
 
 void Game::UpdateMyself(Entity& myself)
 {
-	Memory::rpm<Entity>(Globals::hProcess, Offsets::GetLocalPlayer(), myself);
+	uintptr_t address{ Offsets::GetLocalPlayer() };
+
+	Memory::rpm<Entity>(Globals::hProcess, address, myself);
 	myself.dead = myself.health <= 0;
-	myself.address = Offsets::GetLocalPlayer();
+	myself.address = address;
 }
 
 void Game::PopulateArray(std::array<uintptr_t, 31>& ents_ptr, Entity* ents)
@@ -38,7 +40,7 @@ const Game::Entity* Game::ClosestEntity(const Entity* ents, const Entity& myself
 	{
 		if (ents[i].dead) continue;
 
-		float distance{ Math::DistanceFrom(ents[i].feet, myself.feet) };
+		float distance{ Math::DistanceFrom(ents[i].vFeet, myself.vFeet) };
 		if (distance < closest_distance)
 		{
 			closest_distance = distance;

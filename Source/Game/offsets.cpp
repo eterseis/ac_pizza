@@ -22,3 +22,9 @@ unsigned int Offsets::GetLivingEntities()
 	Memory::rpm<unsigned int>(Globals::hProcess, Offsets::living_entities + Globals::module_base, alives);
 	return (alives == 0) ? alives : alives - 1;
 }
+
+uintptr_t Offsets::GetViewMatrix()
+{
+	uintptr_t address{ Offsets::view_matrix + Globals::module_base - 0x2C };
+	return address;
+}
