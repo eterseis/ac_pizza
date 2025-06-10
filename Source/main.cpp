@@ -9,8 +9,9 @@
 
 #define GLEW_STATIC
 
-#include "Dependencies/GLEW/glew.h"
+#include "Dependencies/GLEW/GL/glew.h"
 #include "Dependencies/GLFW/glfw3.h"
+#include "Menu/menu.h"
 
 
 static bool s_active{ true };
@@ -51,10 +52,18 @@ void Aim(const Game::Entity* ents, const Game::Entity& myself)
 
 void ProcessInput(GLFWwindow* window)
 {
-	if (WaitForSingleObject(Globals::hProcess, 0) == WAIT_OBJECT_0)
+	while (true)
 	{
-		s_active = false;
-		glfwSetWindowShouldClose(window, true);
+		if (WaitForSingleObject(Globals::hProcess, 0) == WAIT_OBJECT_0)
+		{
+			s_active = false;
+			glfwSetWindowShouldClose(window, true);
+		}
+
+		if (GetAsyncKeyState(VK_END) & 1)
+		{
+			Settings::g_ShowMenu = !Settings::g_ShowMenu;
+		}
 	}
 }
 
@@ -70,14 +79,12 @@ void Puppeteer(std::array<uintptr_t, 31> addresses, Game::Entity* ents, Game::En
 	}
 }
 
-void OverlaySettings(GLFWwindow* window)
+void OverlaySettings(GLFWwindow* window, bool& should_render)
 {
 	using namespace std::chrono_literals;
 
 	while (!glfwWindowShouldClose(window))
 	{
-		//glfwHideWindow(window);
-
 		WINDOWINFO ac;
 		ac.cbSize = sizeof(WINDOWINFO);
 
@@ -89,6 +96,9 @@ void OverlaySettings(GLFWwindow* window)
 		int height{ ac.rcClient.bottom - ac.rcClient.top };
 		glfwSetWindowSize(window, width, height);
 
+
+		(!ac.dwWindowStatus) ? should_render = false : should_render = true;
+
 		std::this_thread::sleep_for(1ms);
 	}
 }
@@ -97,23 +107,23 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 {
 	if (!glfwInit())
 	{
-		std::cout << "failed to initialize glfw\n";
+		MessageBoxA(nullptr, "failed to initialize glfw", "Null", MB_OK | MB_ICONERROR);
 		return;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-	//glfwWindowHint(GLFW_DECORATED, GL_FALSE);
-	glfwWindowHint(GLFW_FLOATING, GL_TRUE);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
+	glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+	glfwWindowHint(GLFW_FLOATING, GL_TRUE);
 	glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
 
 	GLFWwindow* window{ glfwCreateWindow(800, 600, title, nullptr, nullptr) };
 
 	if (!window)
 	{
-		std::cout << "failed to create window\n";
+		MessageBoxA(nullptr, "failed to create window", "Null", MB_OK | MB_ICONERROR);
 		glfwTerminate();
 		return;
 	}
@@ -123,29 +133,67 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 
 	if (glewInit() != GLEW_OK)
 	{
-		std::cout << "failed to initialize glew\n";
+		MessageBoxA(nullptr, "failed to initialize glew", "Null", MB_OK | MB_ICONERROR);
 		return;
 	}
 
-	std::thread settings(&OverlaySettings, window);
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 130");
+
+	ImGuiStyle& style{ ImGui::GetStyle() };
+	ImVec4* colors{ style.Colors };
+
+	Menu::LoadTheme(colors, style);
+
+	std::thread process_input(&ProcessInput, window);
+	process_input.detach();
+
+	bool should_render{ false };
+	std::thread settings(&OverlaySettings, window, std::ref(should_render));
 	settings.detach();
 
 	while (!glfwWindowShouldClose(window))
 	{
-		ProcessInput(window);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
+		glfwGetWindowSize(window, &v.m_Width, &v.m_Height);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glfwGetWindowSize(window, &v.m_Width, &v.m_Height);
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		if (should_render)
 		{
-			v.TestViewMatrix(ents);
+			if (Settings::g_ShowMenu)
+			{
+				//ImGui::ShowDemoWindow();
+				Menu::Render(v.m_Width, v.m_Height);
+			}
+			v.Render(ents);
 		}
 
+		ImGui::Render();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		int display_w, display_h;
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(window);
 	glfwTerminate();
+
+	return;
 }
 
 int main()
@@ -154,10 +202,13 @@ int main()
 	Globals::module_base = reinterpret_cast<uintptr_t>(Memory::GetModuleBaseAddress("ac_client.exe", procId));
 	Globals::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | SYNCHRONIZE, false, procId);
 
+	/*AllocConsole();
+	FILE* s;
+	freopen_s(&s, "CONOUT$", "w", stdout);*/
 	if (!Globals::hProcess)
 	{
-		std::cout << "failed to find assault cube process\n";
-		return -1;
+		MessageBoxA(0, "unable to find assault cube", "Null", MB_OK | MB_ICONERROR);
+		return EXIT_FAILURE;
 	}
 
 	std::array<uintptr_t, 31> entityAddresses;
@@ -168,10 +219,9 @@ int main()
 	std::thread pup(&Puppeteer, std::ref(entityAddresses), entities, std::ref(myself), std::ref(v));
 	pup.detach();
 
-	//ShowWindow(GetConsoleWindow(), SW_HIDE);
-	Overlay("Cosmo", entities, myself, v);
+	Overlay("Null", entities, myself, v);
 
 	CloseHandle(Globals::hProcess);
 	delete[] entities;
-	return 0;
+	return EXIT_SUCCESS;
 }

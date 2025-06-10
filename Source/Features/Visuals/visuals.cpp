@@ -2,12 +2,12 @@
 #include "../../Math/math.hpp"
 #include "../../Game/offsets.hpp"
 
-#include "../../Dependencies/GLEW/glew.h"
+#include "../../Dependencies/GLEW/GL/glew.h"
 #include "../../Dependencies/GLFW/glfw3.h"
 
-void Visuals::DrawLine(float ignore, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const
+void Visuals::DrawLine(float ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const
 {
-	if (this->m_Outlined && !ignore)
+	if (this->m_Outlined && !ignore_outlined)
 	{
 		Visuals::DrawLine(true, thickness + 1.0f, x, x2, y, y2, w, { 0.0f, 0.0f, 0.0f, 1.0f });
 	}
@@ -22,9 +22,9 @@ void Visuals::DrawLine(float ignore, float thickness, float x, float x2, float y
 	glEnd();
 }
 
-void Visuals::DrawRect(float ignore, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const
+void Visuals::DrawRect(float ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const
 {
-	if (this->m_Outlined && !ignore)
+	if (this->m_Outlined && !ignore_outlined)
 	{
 		Visuals::DrawRect(true, thickness + 1.0f, x, x2, y, y2, w, { 0.0f, 0.0f, 0.0f, 1.0f });
 	}
@@ -64,51 +64,23 @@ void Visuals::DrawFilledRect(float x, float x2, float y, float y2, float w, vec4
 	glEnd();
 }
 
-void Visuals::TestViewMatrix(const Game::Entity* ents)
+void Visuals::Snaplines(const vec2& pos)
 {
-	const auto living_ents{ Offsets::GetLivingEntities() };
-
-	for (unsigned int i{ 0 }; i < living_ents; ++i)
-	{
-		Visuals::Snaplines(ents[i]);
-		Visuals::BoundingBox(ents[i]);
-		Visuals::HealthBar(ents[i]);
-	}
-}
-
-void Visuals::Snaplines(const Game::Entity& ent)
-{
-	vec2 screen;
-	if (!Math::WorldToScreen(ent.vFeet, screen, this->m_Matrix, this->m_Width, this->m_Height)) return;
-
 	constexpr vec2 origin{ 0.0f, -1.0f };
-	Visuals::DrawLine(false, 1.0f, screen.x, origin.x, screen.y, origin.y, 0.0f, vec4{ 1.0f, 0.0f, 0.0f, 1.f });
+	Visuals::DrawLine(false, 1.0f, pos.x, origin.x, pos.y, origin.y, 0.0f, vec4{ 1.0f, 0.0f, 0.0f, 1.f });
 }
 
-void Visuals::BoundingBox(const Game::Entity& ent)
+void Visuals::BoundingBox(const vec2& bottom, const vec2& top)
 {
-	vec2 bottom;
-	if (!Math::WorldToScreen(ent.vFeet, bottom, this->m_Matrix, this->m_Width, this->m_Height)) return;
-
-	vec2 top;
-	if (!Math::WorldToScreen({ ent.vHead.x, ent.vHead.y, ent.vHead.z + 0.8f }, top, this->m_Matrix, this->m_Width, this->m_Height)) return;
-
 	float height{ top.y - bottom.y };
 	float width{ height / 5.0f };
 
-	Visuals::DrawRect(false, 1.0f, bottom.x, top.x, bottom.y, top.y, width, vec4{ 1.f, .0f, .0f, 1.0f });
+	Visuals::DrawRect(false, 1.0f, bottom.x, top.x, bottom.y, top.y, width, vec4{ 1.0f, 0.0f, 0.0f ,1.0f });
 	Visuals::DrawFilledRect(bottom.x, top.x, bottom.y, top.y, width, vec4{ 1.f, 0.f, 0.f, 0.2f });
 }
 
-void Visuals::HealthBar(const Game::Entity& ent)
+void Visuals::HealthBar(const Game::Entity& ent, const vec2& bottom, const vec2& top)
 {
-	vec2 bottom;
-	if (!Math::WorldToScreen(ent.vFeet, bottom, this->m_Matrix, this->m_Width, this->m_Height)) return;
-
-	vec2 top;
-	if (!Math::WorldToScreen({ ent.vHead.x, ent.vHead.y, ent.vHead.z + 0.8f }, top, this->m_Matrix, this->m_Width, this->m_Height)) return;
-
-
 	float height{ top.y - bottom.y };
 	float width{ height / 4.0f };
 
@@ -126,11 +98,19 @@ void Visuals::HealthBar(const Game::Entity& ent)
 	Visuals::DrawLine(true, 1.0f, x, bottom.x, y, bottom.y, width, { .0f, 1.f, .0f, 1.f });
 }
 
-void Visuals::RenderAll()
+void Visuals::Render(const Game::Entity* ents)
 {
 	const auto living_ents{ Offsets::GetLivingEntities() };
 	for (unsigned int i{ 0 }; i < living_ents; ++i)
 	{
 
+		vec2 bottom;
+		vec2 top;
+		if (!Math::WorldToScreen(ents[i].vFeet, bottom, this->m_Matrix, this->m_Width, this->m_Height)) continue;
+		if (!Math::WorldToScreen({ ents[i].vHead.x, ents[i].vHead.y, ents[i].vHead.z + .8f }, top, this->m_Matrix, this->m_Width, this->m_Height)) continue;
+
+		Visuals::Snaplines(bottom);
+		Visuals::BoundingBox(bottom, top);
+		Visuals::HealthBar(ents[i], bottom, top);
 	}
 }

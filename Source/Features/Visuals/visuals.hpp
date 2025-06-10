@@ -4,14 +4,13 @@
 class Visuals
 {
 public:
-	void DrawLine(float ignore, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const;
-	void DrawRect(float ignore, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const;
+	void DrawLine(float ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const;
+	void DrawRect(float ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const;
 	void DrawFilledRect(float x, float x2, float y, float y2, float w, vec4 color) const;
-	void TestViewMatrix(const Game::Entity* ents);
-	void Snaplines(const Game::Entity& ent);
-	void BoundingBox(const Game::Entity& ent);
-	void HealthBar(const Game::Entity& ent);
-	void RenderAll();
+	void Snaplines(const vec2& pos);
+	void BoundingBox(const vec2& bottom, const vec2& top);
+	void HealthBar(const Game::Entity& ent, const vec2& bottom, const vec2& top);
+	void Render(const Game::Entity* entities);
 public:
 	float m_Matrix[16];
 	bool m_Outlined;

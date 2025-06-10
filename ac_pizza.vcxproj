@@ -71,20 +71,28 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
+    <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
+    <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
+    <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
+    <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,9 +104,10 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -113,9 +122,10 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,9 +138,10 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,12 +156,20 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Dependencies\ImGui\imgui.cpp" />
+    <ClCompile Include="Source\Dependencies\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Source\Dependencies\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Source\Dependencies\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Source\Dependencies\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Source\Dependencies\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Source\Dependencies\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Source\Features\Aimbot\aimbot.cpp" />
     <ClCompile Include="Source\Features\Visuals\visuals.cpp" />
     <ClCompile Include="Source\Game\entity.cpp" />
@@ -167,6 +186,7 @@
     </ClCompile>
     <ClCompile Include="Source\Math\math.cpp" />
     <ClCompile Include="Source\Memory\memory.cpp" />
+    <ClCompile Include="Source\Menu\menu.cpp" />
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.hpp</PrecompiledHeaderFile>
@@ -179,15 +199,36 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Dependencies\GLEW\eglew.h" />
+    <ClInclude Include="Source\Dependencies\GLEW\glew.h" />
+    <ClInclude Include="Source\Dependencies\GLEW\glxew.h" />
+    <ClInclude Include="Source\Dependencies\GLEW\wglew.h" />
+    <ClInclude Include="Source\Dependencies\GLFW\glfw3.h" />
+    <ClInclude Include="Source\Dependencies\GLFW\glfw3native.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imconfig.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imgui.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imgui_impl_glfw.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imgui_impl_opengl3.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imgui_internal.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Source\Dependencies\ImGui\imstb_truetype.h" />
     <ClInclude Include="Source\Features\Aimbot\aimbot.h" />
     <ClInclude Include="Source\Features\Visuals\visuals.hpp" />
     <ClInclude Include="Source\Game\entity.h" />
     <ClInclude Include="Source\Game\offsets.hpp" />
     <ClInclude Include="Source\Game\vector.h" />
     <ClInclude Include="Source\Globals\globals.h" />
+    <ClInclude Include="Source\Globals\settings.h" />
     <ClInclude Include="Source\Math\math.hpp" />
     <ClInclude Include="Source\Memory\memory.hpp" />
+    <ClInclude Include="Source\Menu\menu.h" />
     <ClInclude Include="Source\pch.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Source\Dependencies\GLEW\lib\glew32s.lib" />
+    <Library Include="Source\Dependencies\GLFW\lib\glfw3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

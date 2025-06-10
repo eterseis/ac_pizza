@@ -27,10 +27,10 @@ bool Math::WorldToScreen(const vec3& pos, vec2& screen, const float* matrix, con
 	ndc.y = convert.y / convert.w;
 	ndc.z = convert.z / convert.w;
 
-	/* converts to a range of 1.0f && -1.0f */
 	screen.x = (width / 2.0f * ndc.x) + (ndc.x + width / 2.0f);
 	screen.y = (height / 2.0f * ndc.y) + (ndc.y + height / 2.0f);
 
+	/* converts to a range of 1.0f && -1.0f */
 	screen.x = (((screen.x - 0.0f) * (1.0f - -1.0f)) / (width - 0.0f)) + -1.0f;
 	screen.y = (((screen.y - 0.0f) * (1.0f - -1.0f)) / (height - 0.0f)) + -1.0f;
 
