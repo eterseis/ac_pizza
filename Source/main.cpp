@@ -8,73 +8,71 @@
 #include "Game/offsets.hpp"
 
 #define GLEW_STATIC
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
 
 #include "Dependencies/GLEW/GL/glew.h"
 #include "Dependencies/GLFW/glfw3.h"
+#include "Dependencies/GLFW/glfw3native.h"
 #include "Menu/menu.h"
 
 
-static bool s_active{ true };
+static bool s_Active{ true };
+static bool s_GlfwWindowFocused{ false };
 
-class Timer
+void ForceWindowFocus(HWND window)
 {
-public:
-	Timer()
-	{
-		m_StartTimePoint = std::chrono::high_resolution_clock::now();
-	}
-	~Timer()
-	{
-		Stop();
-	}
-	void Stop()
-	{
-		auto endTimePoint{ std::chrono::high_resolution_clock::now() };
+	INPUT input{};
+	input.type = INPUT_KEYBOARD;
+	input.ki.wVk = VK_MENU;
+	input.ki.dwFlags = KEYEVENTF_SCANCODE;
 
-		auto start{ std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimePoint).time_since_epoch().count() };
-		auto end{ std::chrono::time_point_cast<std::chrono::microseconds>(endTimePoint).time_since_epoch().count() };
+	SendInput(1, &input, sizeof(INPUT));
 
-		auto duration{ end - start };
-		double ms{ duration * 0.001 };
+	SetForegroundWindow(window);
 
-		std::cout << duration << "us (" << ms << "ms)\n";
-	}
-
-private:
-	std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimePoint;
-};
-
-void Aim(const Game::Entity* ents, const Game::Entity& myself)
-{
-	const Game::Entity* pTarget = Game::ClosestEntity(ents, myself);
-	Aimbot::ClosestTarget(*pTarget, myself);
+	input.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+	SendInput(1, &input, sizeof(INPUT));
 }
 
 void ProcessInput(GLFWwindow* window)
 {
+	using namespace std::chrono_literals;
+
 	while (true)
 	{
 		if (WaitForSingleObject(Globals::hProcess, 0) == WAIT_OBJECT_0)
 		{
-			s_active = false;
+			s_Active = false;
 			glfwSetWindowShouldClose(window, true);
 		}
 
 		if (GetAsyncKeyState(VK_END) & 1)
 		{
 			Settings::g_ShowMenu = !Settings::g_ShowMenu;
+			(!Settings::g_ShowMenu) ? glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, true) : glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, false);
+
+			auto hwnd_ac{ FindWindowA(nullptr, "AssaultCube") };
+			ForceWindowFocus(hwnd_ac);
+
+			std::this_thread::sleep_for(20ms);
+			if (Settings::g_ShowMenu)
+			{
+				ForceWindowFocus(glfwGetWin32Window(window));
+			}
 		}
+		std::this_thread::sleep_for(1ms);
 	}
 }
 
 /*actual reading-writing*/
 void Puppeteer(std::array<uintptr_t, 31> addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v)
 {
-	while (s_active)
+	while (s_Active)
 	{
 		Game::UpdateMyself(myself);
 		Game::PopulateArray(addresses, ents);
-		//Aim(ents, myself);
+		//Aimbot::ClosestTarget(ents, myself);
 		Memory::rpm<float[16]>(Globals::hProcess, Offsets::GetViewMatrix(), v.m_Matrix);
 	}
 }
@@ -96,9 +94,7 @@ void OverlaySettings(GLFWwindow* window, bool& should_render)
 		int height{ ac.rcClient.bottom - ac.rcClient.top };
 		glfwSetWindowSize(window, width, height);
 
-
-		(!ac.dwWindowStatus) ? should_render = false : should_render = true;
-
+		(ac.dwWindowStatus || s_GlfwWindowFocused) ? should_render = true : should_render = false;
 		std::this_thread::sleep_for(1ms);
 	}
 }
@@ -107,23 +103,28 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 {
 	if (!glfwInit())
 	{
-		MessageBoxA(nullptr, "failed to initialize glfw", "Null", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "failed to initialize glfw", "mozart.dead", MB_OK | MB_ICONERROR);
 		return;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
-	glfwWindowHint(GLFW_DECORATED, GL_FALSE);
-	glfwWindowHint(GLFW_FLOATING, GL_TRUE);
-	glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
+	/*overlay hints*/
+	{
+		glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
+		glfwWindowHint(GLFW_FOCUSED, GL_FALSE);
+		glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+		glfwWindowHint(GLFW_FLOATING, GL_TRUE);
+	}
 
 	GLFWwindow* window{ glfwCreateWindow(800, 600, title, nullptr, nullptr) };
 
 	if (!window)
 	{
-		MessageBoxA(nullptr, "failed to create window", "Null", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "failed to create window", "mozart.dead", MB_OK | MB_ICONERROR);
 		glfwTerminate();
 		return;
 	}
@@ -131,9 +132,16 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
+	/*****************************/
+	/* hides window taskbar icon */
+	glfwHideWindow(window);
+	SetWindowLongA(glfwGetWin32Window(window), GWL_EXSTYLE, WS_EX_TOOLWINDOW);
+	glfwShowWindow(window);
+	glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
+	/****************************/
 	if (glewInit() != GLEW_OK)
 	{
-		MessageBoxA(nullptr, "failed to initialize glew", "Null", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "failed to initialize glew", "mozart.dead", MB_OK | MB_ICONERROR);
 		return;
 	}
 
@@ -158,6 +166,7 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 
 	while (!glfwWindowShouldClose(window))
 	{
+		s_GlfwWindowFocused = glfwGetWindowAttrib(window, GLFW_FOCUSED);
 		glfwGetWindowSize(window, &v.m_Width, &v.m_Height);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -165,19 +174,37 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+
 		if (should_render)
 		{
 			if (Settings::g_ShowMenu)
 			{
-				//ImGui::ShowDemoWindow();
 				Menu::Render(v.m_Width, v.m_Height);
+				{
+					v.m_EnableVisuals = Settings::g_EnableVisuals;
+					v.m_TeamCheck = Settings::g_Visuals_TeamCheck;
+					v.m_HealthCheck = Settings::g_Visuals_HealthCheck;
+					v.m_Outlined = Settings::g_Visuals_Outline;
+
+					v.m_Snaplines = Settings::g_Visuals_Snaplines;
+					v.m_BoundingBox = Settings::g_Visuals_BoundingBox;
+					v.m_FillBox = Settings::g_Visuals_BoundingBoxFilled;
+					v.m_HealthBar = Settings::g_Visuals_HealthBar;
+
+					v.m_Snaplines_Color = Settings::g_Visuals_Snaplines_Color;
+					v.m_BoundingBox_Color = Settings::g_BoundingBox_Color;
+					v.m_FillBox_Color = Settings::g_FillBox_Color;
+					v.m_HealthBar_Color = Settings::g_HealthBar_Color;
+				}
 			}
-			v.Render(ents);
+
+			v.Render(ents, myself);
 		}
 
 		ImGui::Render();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
+		glEnable(GL_MULTISAMPLE);
 		int display_w, display_h;
 		glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
@@ -192,7 +219,6 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
-
 	return;
 }
 
@@ -207,19 +233,19 @@ int main()
 	freopen_s(&s, "CONOUT$", "w", stdout);*/
 	if (!Globals::hProcess)
 	{
-		MessageBoxA(0, "unable to find assault cube", "Null", MB_OK | MB_ICONERROR);
+		MessageBoxA(0, "unable to find assault cube", "mozart.dead", MB_OK | MB_ICONERROR);
 		return EXIT_FAILURE;
 	}
 
 	std::array<uintptr_t, 31> entityAddresses;
 	Game::Entity* entities = new Game::Entity[31];
 	Game::Entity myself;
-	Visuals v{ .m_Outlined = true };
+	Visuals v{};
 
 	std::thread pup(&Puppeteer, std::ref(entityAddresses), entities, std::ref(myself), std::ref(v));
 	pup.detach();
 
-	Overlay("Null", entities, myself, v);
+	Overlay("mozart.dead", entities, myself, v);
 
 	CloseHandle(Globals::hProcess);
 	delete[] entities;

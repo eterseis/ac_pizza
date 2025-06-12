@@ -5,18 +5,19 @@
 #include "../../Math/math.hpp"
 #include <cmath>
 
-void Aimbot::ClosestTarget(const Game::Entity& target, const Game::Entity& myself)
+void Aimbot::ClosestTarget(const Game::Entity* ents, const Game::Entity& myself)
 {
-	if (target.address == myself.address) return;
+	const Game::Entity* pTarget{ Game::ClosestEntity(ents, myself) };
+	if (pTarget->address == myself.address) return;
 
 	constexpr float pi{ 3.14159265358979323846f };
 
-	float abspos_x = target.vHead.x - myself.vHead.x;
-	float abspos_y = target.vHead.y - myself.vHead.y;
-	float abspos_z = target.vHead.z - myself.vHead.z;
+	float abspos_x = pTarget->vHead.x - myself.vHead.x;
+	float abspos_y = pTarget->vHead.y - myself.vHead.y;
+	float abspos_z = pTarget->vHead.z - myself.vHead.z;
 
 	float azimuth_xy = atan2f(abspos_y, abspos_x);
-	float azimuth_z = atan2f(abspos_z, Math::DistanceFrom(target.vHead, myself.vHead));
+	float azimuth_z = atan2f(abspos_z, Math::DistanceFrom(pTarget->vHead, myself.vHead));
 
 	float yaw = (azimuth_xy * (180.0f / pi));
 	yaw += 90.0f;

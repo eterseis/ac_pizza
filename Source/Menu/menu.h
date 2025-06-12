@@ -8,7 +8,8 @@
 
 namespace Menu
 {
-	inline int selected_tab{ 0 };
 	void LoadTheme(ImVec4* colors, ImGuiStyle& style);
+	void BeginContainer(const char* label);
+	void EndContainer(const char* label);
 	void Render(int width, int height);
 }

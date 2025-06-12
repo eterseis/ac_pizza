@@ -4,8 +4,9 @@
 
 #include "../../Dependencies/GLEW/GL/glew.h"
 #include "../../Dependencies/GLFW/glfw3.h"
+#include <iostream>
 
-void Visuals::DrawLine(float ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const
+void Visuals::DrawLine(bool ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, const vec4& color) const
 {
 	if (this->m_Outlined && !ignore_outlined)
 	{
@@ -22,7 +23,7 @@ void Visuals::DrawLine(float ignore_outlined, float thickness, float x, float x2
 	glEnd();
 }
 
-void Visuals::DrawRect(float ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, vec4 color) const
+void Visuals::DrawRect(bool ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, const vec4& color) const
 {
 	if (this->m_Outlined && !ignore_outlined)
 	{
@@ -48,7 +49,7 @@ void Visuals::DrawRect(float ignore_outlined, float thickness, float x, float x2
 	glEnd();
 }
 
-void Visuals::DrawFilledRect(float x, float x2, float y, float y2, float w, vec4 color) const
+void Visuals::DrawFilledRect(float x, float x2, float y, float y2, float w, const vec4& color) const
 {
 	glColor4f(color.x, color.y, color.z, color.w);
 	glBegin(GL_TRIANGLES);
@@ -67,16 +68,18 @@ void Visuals::DrawFilledRect(float x, float x2, float y, float y2, float w, vec4
 void Visuals::Snaplines(const vec2& pos)
 {
 	constexpr vec2 origin{ 0.0f, -1.0f };
-	Visuals::DrawLine(false, 1.0f, pos.x, origin.x, pos.y, origin.y, 0.0f, vec4{ 1.0f, 0.0f, 0.0f, 1.f });
+	Visuals::DrawLine(false, 1.0f, pos.x, origin.x, pos.y, origin.y, 0.0f, this->m_Snaplines_Color);
 }
 
-void Visuals::BoundingBox(const vec2& bottom, const vec2& top)
+void Visuals::BoundingBox(bool fill, const vec2& bottom, const vec2& top)
 {
 	float height{ top.y - bottom.y };
 	float width{ height / 5.0f };
 
-	Visuals::DrawRect(false, 1.0f, bottom.x, top.x, bottom.y, top.y, width, vec4{ 1.0f, 0.0f, 0.0f ,1.0f });
-	Visuals::DrawFilledRect(bottom.x, top.x, bottom.y, top.y, width, vec4{ 1.f, 0.f, 0.f, 0.2f });
+	Visuals::DrawRect(false, 1.0f, bottom.x, top.x, bottom.y, top.y, width, this->m_BoundingBox_Color);
+
+	if (fill)
+		Visuals::DrawFilledRect(bottom.x, top.x, bottom.y, top.y, width, this->m_FillBox_Color);
 }
 
 void Visuals::HealthBar(const Game::Entity& ent, const vec2& bottom, const vec2& top)
@@ -95,22 +98,26 @@ void Visuals::HealthBar(const Game::Entity& ent, const vec2& bottom, const vec2&
 		Visuals::DrawLine(true, 2.5f, bottom.x, top.x, bottom.y, top.y, width, { 0.0f, 0.0f, 0.0f, 1.0f });
 	}
 
-	Visuals::DrawLine(true, 1.0f, x, bottom.x, y, bottom.y, width, { .0f, 1.f, .0f, 1.f });
+	Visuals::DrawLine(true, 1.0f, x, bottom.x, y, bottom.y, width, this->m_HealthBar_Color);
 }
 
-void Visuals::Render(const Game::Entity* ents)
+void Visuals::Render(const Game::Entity* ents, const Game::Entity& myself)
 {
+	if (!this->m_EnableVisuals) return;
+
 	const auto living_ents{ Offsets::GetLivingEntities() };
 	for (unsigned int i{ 0 }; i < living_ents; ++i)
 	{
+		if (this->m_HealthCheck && ents[i].dead) continue;
+		if (this->m_TeamCheck && ents[i].team == myself.team) continue;
 
 		vec2 bottom;
 		vec2 top;
 		if (!Math::WorldToScreen(ents[i].vFeet, bottom, this->m_Matrix, this->m_Width, this->m_Height)) continue;
 		if (!Math::WorldToScreen({ ents[i].vHead.x, ents[i].vHead.y, ents[i].vHead.z + .8f }, top, this->m_Matrix, this->m_Width, this->m_Height)) continue;
 
-		Visuals::Snaplines(bottom);
-		Visuals::BoundingBox(bottom, top);
-		Visuals::HealthBar(ents[i], bottom, top);
+		if (this->m_Snaplines)	Visuals::Snaplines(bottom);
+		if (this->m_BoundingBox)	Visuals::BoundingBox(this->m_FillBox, bottom, top);
+		if (this->m_HealthBar)	Visuals::HealthBar(ents[i], bottom, top);
 	}
 }

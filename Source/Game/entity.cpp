@@ -8,7 +8,7 @@ void Game::UpdateMyself(Entity& myself)
 {
 	uintptr_t address{ Offsets::GetLocalPlayer() };
 
-	Memory::rpm<Entity>(Globals::hProcess, address, myself);
+	Memory::rpm<Entity>(Globals::hProcess, address, myself, 784);
 	myself.dead = myself.health <= 0;
 	myself.address = address;
 }
@@ -23,7 +23,7 @@ void Game::PopulateArray(std::array<uintptr_t, 31>& ents_ptr, Entity* ents)
 
 	for (unsigned int i{}; i < living_ents; ++i)
 	{
-		Memory::rpm<Entity>(Globals::hProcess, ents_ptr[i], ents[i]);
+		Memory::rpm<Entity>(Globals::hProcess, ents_ptr[i], ents[i], 784);
 		ents[i].dead = ents[i].health <= 0;
 		ents[i].address = ents_ptr[i];
 	}

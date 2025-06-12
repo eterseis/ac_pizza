@@ -225,6 +225,7 @@
     <ClInclude Include="Source\Memory\memory.hpp" />
     <ClInclude Include="Source\Menu\menu.h" />
     <ClInclude Include="Source\pch.hpp" />
+    <ClInclude Include="Source\timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Source\Dependencies\GLEW\lib\glew32s.lib" />

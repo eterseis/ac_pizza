@@ -11,9 +11,9 @@ namespace Memory
 	BYTE* GetModuleBaseAddress(const char* proc, DWORD id);
 
 	template <typename T>
-	void rpm(HANDLE hProc, uintptr_t address, T& buffer)
+	void rpm(HANDLE hProc, uintptr_t address, T& buffer, SIZE_T size = sizeof(T))
 	{
-		::ReadProcessMemory(hProc, reinterpret_cast<LPCVOID>(address), &buffer, sizeof(buffer), nullptr);
+		::ReadProcessMemory(hProc, reinterpret_cast<LPCVOID>(address), &buffer, size, nullptr);
 	}
 
 	template <typename T>

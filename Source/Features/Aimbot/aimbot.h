@@ -3,5 +3,5 @@
 
 namespace Aimbot
 {
-	void ClosestTarget(const Game::Entity& target, const Game::Entity& myself);
+	void ClosestTarget(const Game::Entity* ents, const Game::Entity& myself);
 }
