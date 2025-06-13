@@ -221,6 +221,7 @@
     <ClInclude Include="Source\Game\vector.h" />
     <ClInclude Include="Source\Globals\globals.h" />
     <ClInclude Include="Source\Globals\settings.h" />
+    <ClInclude Include="Source\includes.h" />
     <ClInclude Include="Source\Math\math.hpp" />
     <ClInclude Include="Source\Memory\memory.hpp" />
     <ClInclude Include="Source\Menu\menu.h" />

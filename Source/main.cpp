@@ -1,24 +1,13 @@
 #include "pch.hpp"
-#include "Memory/memory.hpp"
-#include "Game/entity.h"
-#include "Globals/globals.h"
-#include "Features/Aimbot/aimbot.h"
-#include "Features/Visuals/visuals.hpp"
-#include "Math/math.hpp"
-#include "Game/offsets.hpp"
-
-#define GLEW_STATIC
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WGL
-
-#include "Dependencies/GLEW/GL/glew.h"
-#include "Dependencies/GLFW/glfw3.h"
-#include "Dependencies/GLFW/glfw3native.h"
-#include "Menu/menu.h"
-
+#include "includes.h"
 
 static bool s_Active{ true };
 static bool s_GlfwWindowFocused{ false };
+
+void framebuffer_size_callback(GLFWwindow* w, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
 
 void ForceWindowFocus(HWND window)
 {
@@ -35,11 +24,24 @@ void ForceWindowFocus(HWND window)
 	SendInput(1, &input, sizeof(INPUT));
 }
 
+/* threads */
+#pragma region
+/* reading-writing */
+void Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v)
+{
+	while (s_Active)
+	{
+		Game::UpdateMyself(myself);
+		Game::PopulateArray(addresses, ents);
+		Memory::rpm<float[16]>(Globals::hProcess, Offsets::GetViewMatrix(), v.m_Matrix);
+	}
+}
+
 void ProcessInput(GLFWwindow* window)
 {
 	using namespace std::chrono_literals;
 
-	while (true)
+	while (s_Active)
 	{
 		if (WaitForSingleObject(Globals::hProcess, 0) == WAIT_OBJECT_0)
 		{
@@ -65,18 +67,6 @@ void ProcessInput(GLFWwindow* window)
 	}
 }
 
-/*actual reading-writing*/
-void Puppeteer(std::array<uintptr_t, 31> addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v)
-{
-	while (s_Active)
-	{
-		Game::UpdateMyself(myself);
-		Game::PopulateArray(addresses, ents);
-		//Aimbot::ClosestTarget(ents, myself);
-		Memory::rpm<float[16]>(Globals::hProcess, Offsets::GetViewMatrix(), v.m_Matrix);
-	}
-}
-
 void OverlaySettings(GLFWwindow* window, bool& should_render)
 {
 	using namespace std::chrono_literals;
@@ -98,8 +88,21 @@ void OverlaySettings(GLFWwindow* window, bool& should_render)
 		std::this_thread::sleep_for(1ms);
 	}
 }
+#pragma endregion
 
-void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& myself, Visuals& v)
+void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v, GLFWwindow* window, bool& should_render)
+{
+	std::thread puppeteer(&Puppeteer, addresses, ents, std::ref(myself), std::ref(v));
+	puppeteer.detach();
+
+	std::thread process_input(&ProcessInput, window);
+	process_input.detach();
+
+	std::thread overlay_settings(&OverlaySettings, window, std::ref(should_render));
+	overlay_settings.detach();
+}
+
+void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::Entity& myself, Visuals& v)
 {
 	if (!glfwInit())
 	{
@@ -107,20 +110,19 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 		return;
 	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
-
-	/*overlay hints*/
+	/* window hints */
 	{
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
 		glfwWindowHint(GLFW_FOCUSED, GL_FALSE);
 		glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 		glfwWindowHint(GLFW_FLOATING, GL_TRUE);
 	}
 
-	GLFWwindow* window{ glfwCreateWindow(800, 600, title, nullptr, nullptr) };
+	GLFWwindow* window{ glfwCreateWindow(800, 600, "mozart", nullptr, nullptr) };
 
 	if (!window)
 	{
@@ -131,38 +133,27 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
+	glfwSetFramebufferSizeCallback(window, &framebuffer_size_callback);
 
-	/*****************************/
-	/* hides window taskbar icon */
-	glfwHideWindow(window);
-	SetWindowLongA(glfwGetWin32Window(window), GWL_EXSTYLE, WS_EX_TOOLWINDOW);
-	glfwShowWindow(window);
-	glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
-	/****************************/
+	/* hide taskbar icon */
+	{
+		glfwHideWindow(window);
+		SetWindowLongA(glfwGetWin32Window(window), GWL_EXSTYLE, WS_EX_TOOLWINDOW);
+		glfwShowWindow(window);
+		glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, GL_TRUE);
+	}
+
 	if (glewInit() != GLEW_OK)
 	{
 		MessageBoxA(nullptr, "failed to initialize glew", "mozart.dead", MB_OK | MB_ICONERROR);
 		return;
 	}
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 130");
-
-	ImGuiStyle& style{ ImGui::GetStyle() };
-	ImVec4* colors{ style.Colors };
-
-	Menu::LoadTheme(colors, style);
-
-	std::thread process_input(&ProcessInput, window);
-	process_input.detach();
+	Menu::Init(window);
+	Menu::LoadTheme();
 
 	bool should_render{ false };
-	std::thread settings(&OverlaySettings, window, std::ref(should_render));
-	settings.detach();
+	LaunchThreads(const_cast<uintptr_t*>(addresses), const_cast<Game::Entity*>(ents), const_cast<Game::Entity&>(myself), v, window, should_render);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -170,16 +161,13 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 		glfwGetWindowSize(window, &v.m_Width, &v.m_Height);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
+		Menu::NewFrame();
 
 		if (should_render)
 		{
 			if (Settings::g_ShowMenu)
 			{
-				Menu::Render(v.m_Width, v.m_Height);
+				Menu::Update(480, 360);
 				{
 					v.m_EnableVisuals = Settings::g_EnableVisuals;
 					v.m_TeamCheck = Settings::g_Visuals_TeamCheck;
@@ -197,25 +185,18 @@ void Overlay(const char* title, const Game::Entity* ents, const Game::Entity& my
 					v.m_HealthBar_Color = Settings::g_HealthBar_Color;
 				}
 			}
-
 			v.Render(ents, myself);
 		}
 
-		ImGui::Render();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 		glEnable(GL_MULTISAMPLE);
-		int display_w, display_h;
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		Menu::Render();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	Menu::Shutdown();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -228,24 +209,21 @@ int main()
 	Globals::module_base = reinterpret_cast<uintptr_t>(Memory::GetModuleBaseAddress("ac_client.exe", procId));
 	Globals::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | SYNCHRONIZE, false, procId);
 
-	/*AllocConsole();
+	AllocConsole();
 	FILE* s;
-	freopen_s(&s, "CONOUT$", "w", stdout);*/
+	freopen_s(&s, "CONOUT$", "w", stdout);
 	if (!Globals::hProcess)
 	{
 		MessageBoxA(0, "unable to find assault cube", "mozart.dead", MB_OK | MB_ICONERROR);
 		return EXIT_FAILURE;
 	}
 
-	std::array<uintptr_t, 31> entityAddresses;
+	uintptr_t entityAddresses[31];
 	Game::Entity* entities = new Game::Entity[31];
 	Game::Entity myself;
 	Visuals v{};
 
-	std::thread pup(&Puppeteer, std::ref(entityAddresses), entities, std::ref(myself), std::ref(v));
-	pup.detach();
-
-	Overlay("mozart.dead", entities, myself, v);
+	Overlay(entityAddresses, entities, myself, v);
 
 	CloseHandle(Globals::hProcess);
 	delete[] entities;

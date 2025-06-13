@@ -31,6 +31,6 @@ namespace Game
 	};
 
 	void UpdateMyself(Entity& myself);
-	void PopulateArray(std::array<uintptr_t, 31>& ents_ptr, Entity* ents);
+	void PopulateArray(uintptr_t* ents_ptr, Entity* ents);
 	const Entity* ClosestEntity(const Entity* ents, const Entity& myself);
 }

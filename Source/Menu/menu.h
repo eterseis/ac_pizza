@@ -8,8 +8,13 @@
 
 namespace Menu
 {
-	void LoadTheme(ImVec4* colors, ImGuiStyle& style);
-	void BeginContainer(const char* label);
-	void EndContainer(const char* label);
-	void Render(int width, int height);
+	void BeginContainer(const char* id);
+	void EndContainer(const char* id);
+	void LoadTheme();
+
+	void Init(GLFWwindow* window);
+	void NewFrame();
+	void Update(float width, float height);
+	void Render();
+	void Shutdown();
 }

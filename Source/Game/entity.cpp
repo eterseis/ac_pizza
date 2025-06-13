@@ -13,17 +13,18 @@ void Game::UpdateMyself(Entity& myself)
 	myself.address = address;
 }
 
-void Game::PopulateArray(std::array<uintptr_t, 31>& ents_ptr, Entity* ents)
+void Game::PopulateArray(uintptr_t* ents_ptr, Entity* ents)
 {
 	uintptr_t entity_list{ Offsets::GetEntityList() };
 	unsigned int living_ents{ Offsets::GetLivingEntities() };
 
 	/* get entity addresses */
-	Memory::rpm_array<std::array<uintptr_t, 31>>(Globals::hProcess, entity_list, ents_ptr, sizeof(uintptr_t) * living_ents);
+	Memory::rpm_array(Globals::hProcess, entity_list, ents_ptr, sizeof(uintptr_t) * living_ents);
+	//Memory::rpm_array <
 
 	for (unsigned int i{}; i < living_ents; ++i)
 	{
-		Memory::rpm<Entity>(Globals::hProcess, ents_ptr[i], ents[i], 784);
+		Memory::rpm<Game::Entity>(Globals::hProcess, ents_ptr[i], ents[i], 784);
 		ents[i].dead = ents[i].health <= 0;
 		ents[i].address = ents_ptr[i];
 	}

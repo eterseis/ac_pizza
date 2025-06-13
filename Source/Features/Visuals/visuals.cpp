@@ -4,7 +4,6 @@
 
 #include "../../Dependencies/GLEW/GL/glew.h"
 #include "../../Dependencies/GLFW/glfw3.h"
-#include <iostream>
 
 void Visuals::DrawLine(bool ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, const vec4& color) const
 {
@@ -106,6 +105,7 @@ void Visuals::Render(const Game::Entity* ents, const Game::Entity& myself)
 	if (!this->m_EnableVisuals) return;
 
 	const auto living_ents{ Offsets::GetLivingEntities() };
+	constexpr bool skeleton{ true };
 	for (unsigned int i{ 0 }; i < living_ents; ++i)
 	{
 		if (this->m_HealthCheck && ents[i].dead) continue;

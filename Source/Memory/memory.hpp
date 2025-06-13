@@ -17,9 +17,9 @@ namespace Memory
 	}
 
 	template <typename T>
-	void rpm_array(HANDLE hProc, uintptr_t address, T& buffer, SIZE_T size)
+	void rpm_array(HANDLE hProc, uintptr_t address, T* buffer, SIZE_T size)
 	{
-		::ReadProcessMemory(hProc, reinterpret_cast<LPCVOID>(address), &buffer, size, nullptr);
+		::ReadProcessMemory(hProc, reinterpret_cast<LPCVOID>(address), buffer, size, nullptr);
 	}
 
 	template <typename T>
