@@ -71,26 +71,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
@@ -106,7 +106,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -124,7 +124,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -140,7 +140,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -158,7 +158,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -174,6 +174,7 @@
     <ClCompile Include="Source\Features\Visuals\visuals.cpp" />
     <ClCompile Include="Source\Game\entity.cpp" />
     <ClCompile Include="Source\Game\offsets.cpp" />
+    <ClCompile Include="Source\Globals\settings.cpp" />
     <ClCompile Include="Source\main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.hpp</PrecompiledHeaderFile>
@@ -186,6 +187,7 @@
     </ClCompile>
     <ClCompile Include="Source\Math\math.cpp" />
     <ClCompile Include="Source\Memory\memory.cpp" />
+    <ClCompile Include="Source\Menu\font.cpp" />
     <ClCompile Include="Source\Menu\menu.cpp" />
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -199,6 +201,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Dependencies\FreeType\ft2build.h" />
     <ClInclude Include="Source\Dependencies\GLEW\eglew.h" />
     <ClInclude Include="Source\Dependencies\GLEW\glew.h" />
     <ClInclude Include="Source\Dependencies\GLEW\glxew.h" />
@@ -224,11 +227,13 @@
     <ClInclude Include="Source\includes.h" />
     <ClInclude Include="Source\Math\math.hpp" />
     <ClInclude Include="Source\Memory\memory.hpp" />
+    <ClInclude Include="Source\Menu\font.h" />
     <ClInclude Include="Source\Menu\menu.h" />
     <ClInclude Include="Source\pch.hpp" />
     <ClInclude Include="Source\timer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Source\Dependencies\FreeType\lib\freetype.lib" />
     <Library Include="Source\Dependencies\GLEW\lib\glew32s.lib" />
     <Library Include="Source\Dependencies\GLFW\lib\glfw3.lib" />
   </ItemGroup>

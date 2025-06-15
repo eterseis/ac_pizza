@@ -5,6 +5,8 @@
 #include "Features/Visuals/visuals.hpp"
 #include "Math/math.hpp"
 #include "Game/offsets.hpp"
+#include "Menu/menu.h"
+#include "timer.hpp"
 
 #define GLEW_STATIC
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -13,5 +15,7 @@
 #include "Dependencies/GLEW/GL/glew.h"
 #include "Dependencies/GLFW/glfw3.h"
 #include "Dependencies/GLFW/glfw3native.h"
-#include "Menu/menu.h"
-#include "timer.hpp"
+#include "Dependencies/FreeType/ft2build.h"
+#include "Dependencies/FreeType/freetype/freetype.h"
+
+#include <map>

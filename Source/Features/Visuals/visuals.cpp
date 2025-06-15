@@ -4,6 +4,9 @@
 
 #include "../../Dependencies/GLEW/GL/glew.h"
 #include "../../Dependencies/GLFW/glfw3.h"
+/*freetype*/
+//#include "../../Dependencies/FreeType/ft2build.h"
+
 
 void Visuals::DrawLine(bool ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, const vec4& color) const
 {

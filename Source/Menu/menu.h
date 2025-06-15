@@ -14,7 +14,7 @@ namespace Menu
 
 	void Init(GLFWwindow* window);
 	void NewFrame();
-	void Update(float width, float height);
+	void Update(float width, float height, Settings& s);
 	void Render();
 	void Shutdown();
 }

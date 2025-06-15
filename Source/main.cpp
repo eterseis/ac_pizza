@@ -37,7 +37,7 @@ void Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, V
 	}
 }
 
-void ProcessInput(GLFWwindow* window)
+void ProcessInput(GLFWwindow* window, Settings& s)
 {
 	using namespace std::chrono_literals;
 
@@ -51,14 +51,14 @@ void ProcessInput(GLFWwindow* window)
 
 		if (GetAsyncKeyState(VK_END) & 1)
 		{
-			Settings::g_ShowMenu = !Settings::g_ShowMenu;
-			(!Settings::g_ShowMenu) ? glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, true) : glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, false);
+			s.g_ShowMenu = !s.g_ShowMenu;
+			(!s.g_ShowMenu) ? glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, true) : glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, false);
 
 			auto hwnd_ac{ FindWindowA(nullptr, "AssaultCube") };
 			ForceWindowFocus(hwnd_ac);
 
 			std::this_thread::sleep_for(20ms);
-			if (Settings::g_ShowMenu)
+			if (s.g_ShowMenu)
 			{
 				ForceWindowFocus(glfwGetWin32Window(window));
 			}
@@ -90,19 +90,92 @@ void OverlaySettings(GLFWwindow* window, bool& should_render)
 }
 #pragma endregion
 
-void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v, GLFWwindow* window, bool& should_render)
+void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v, GLFWwindow* window, bool& should_render, Settings& s)
 {
 	std::thread puppeteer(&Puppeteer, addresses, ents, std::ref(myself), std::ref(v));
 	puppeteer.detach();
 
-	std::thread process_input(&ProcessInput, window);
+	std::thread process_input(&ProcessInput, window, std::ref(s));
 	process_input.detach();
 
 	std::thread overlay_settings(&OverlaySettings, window, std::ref(should_render));
 	overlay_settings.detach();
 }
 
-void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::Entity& myself, Visuals& v)
+void FreeShit()
+{
+	struct Character
+	{
+		unsigned int TextureId;
+		vec2 Size;
+		vec2 Bearing;
+		unsigned int Advance;
+	};
+
+	static std::map<char, Character> characters;
+
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+	{
+		std::cout << "ERROR::FREETYPE: could not init library\n";
+		return;
+	}
+
+	FT_Face face;
+	if (FT_New_Face(ft, "C:/Windows/Fonts/arial.ttf", 0, &face))
+	{
+		std::cout << "ERROR::FREETYPE: failed to load font\n";
+		return;
+	}
+	FT_Set_Pixel_Sizes(face, 0, 48);
+
+	if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
+	{
+		std::cout << "ERROR::FREETYPE: failed to load glyph\n";
+		return;
+	}
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	for (unsigned char c{}; c < 128; ++c)
+	{
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		{
+			std::cout << "ERROR::FREETYPE: failed to load glyph\n";
+			continue;
+		}
+		unsigned int texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			face->glyph->bitmap.buffer
+		);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		Character character{
+			texture,
+			{(float)face->glyph->bitmap.width, (float)face->glyph->bitmap.rows},
+			{(float)face->glyph->bitmap_left, (float)face->glyph->bitmap_top},
+			(unsigned int)face->glyph->advance.x
+		};
+		characters.insert(std::pair<char, Character>(c, character));
+	}
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+}
+
+void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::Entity& myself, Visuals& v, Settings& settings)
 {
 	if (!glfwInit())
 	{
@@ -153,8 +226,17 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 	Menu::LoadTheme();
 
 	bool should_render{ false };
-	LaunchThreads(const_cast<uintptr_t*>(addresses), const_cast<Game::Entity*>(ents), const_cast<Game::Entity&>(myself), v, window, should_render);
+	LaunchThreads(
+		const_cast<uintptr_t*>(addresses),
+		const_cast<Game::Entity*>(ents),
+		const_cast<Game::Entity&>(myself),
+		v,
+		window,
+		should_render,
+		settings
+	);
 
+	//FreeShit();
 	while (!glfwWindowShouldClose(window))
 	{
 		s_GlfwWindowFocused = glfwGetWindowAttrib(window, GLFW_FOCUSED);
@@ -165,24 +247,24 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 
 		if (should_render)
 		{
-			if (Settings::g_ShowMenu)
+			if (settings.g_ShowMenu)
 			{
-				Menu::Update(480, 360);
+				Menu::Update(360, 480, settings);
 				{
-					v.m_EnableVisuals = Settings::g_EnableVisuals;
-					v.m_TeamCheck = Settings::g_Visuals_TeamCheck;
-					v.m_HealthCheck = Settings::g_Visuals_HealthCheck;
-					v.m_Outlined = Settings::g_Visuals_Outline;
+					v.m_EnableVisuals = settings.g_EnableVisuals;
+					v.m_TeamCheck = settings.g_Visuals_TeamCheck;
+					v.m_HealthCheck = settings.g_Visuals_HealthCheck;
+					v.m_Outlined = settings.g_Visuals_Outline;
 
-					v.m_Snaplines = Settings::g_Visuals_Snaplines;
-					v.m_BoundingBox = Settings::g_Visuals_BoundingBox;
-					v.m_FillBox = Settings::g_Visuals_BoundingBoxFilled;
-					v.m_HealthBar = Settings::g_Visuals_HealthBar;
+					v.m_Snaplines = settings.g_Visuals_Snaplines;
+					v.m_BoundingBox = settings.g_Visuals_BoundingBox;
+					v.m_FillBox = settings.g_Visuals_BoundingBoxFilled;
+					v.m_HealthBar = settings.g_Visuals_HealthBar;
 
-					v.m_Snaplines_Color = Settings::g_Visuals_Snaplines_Color;
-					v.m_BoundingBox_Color = Settings::g_BoundingBox_Color;
-					v.m_FillBox_Color = Settings::g_FillBox_Color;
-					v.m_HealthBar_Color = Settings::g_HealthBar_Color;
+					v.m_Snaplines_Color = settings.g_Visuals_Snaplines_Color;
+					v.m_BoundingBox_Color = settings.g_BoundingBox_Color;
+					v.m_FillBox_Color = settings.g_FillBox_Color;
+					v.m_HealthBar_Color = settings.g_HealthBar_Color;
 				}
 			}
 			v.Render(ents, myself);
@@ -222,8 +304,9 @@ int main()
 	Game::Entity* entities = new Game::Entity[31];
 	Game::Entity myself;
 	Visuals v{};
+	Settings settings{};
 
-	Overlay(entityAddresses, entities, myself, v);
+	Overlay(entityAddresses, entities, myself, v, settings);
 
 	CloseHandle(Globals::hProcess);
 	delete[] entities;

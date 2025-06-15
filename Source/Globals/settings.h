@@ -1,23 +1,24 @@
 #pragma once
 #include "../Game/vector.h"
 
-namespace Settings
+class Settings
 {
-	inline bool g_ShowMenu{ false };
+public:
+	bool SaveConfig(char* file_name);
+	bool LoadConfig(char* file_name);
 
-	inline bool g_EnableVisuals{ true };
-	inline bool g_Visuals_TeamCheck{ true };
-	inline bool g_Visuals_HealthCheck{ true };
-	inline bool g_Visuals_Outline{ true };
+	bool g_ShowMenu{ false };
+	bool g_EnableVisuals{ false };
+	bool g_Visuals_TeamCheck{ false };
+	bool g_Visuals_HealthCheck{ false };
+	bool g_Visuals_Outline{ false };
+	bool g_Visuals_Snaplines{ false };
+	bool g_Visuals_BoundingBox{ false };
+	bool g_Visuals_BoundingBoxFilled{ false };
+	bool g_Visuals_HealthBar{ false };
 
-	inline bool g_Visuals_Snaplines{ true };
-	inline vec4 g_Visuals_Snaplines_Color{ .x = 1.0f, .w = 1.0f };
-
-	inline bool g_Visuals_BoundingBox{ true };
-	inline vec4 g_BoundingBox_Color{ .x = 1.0f, .w = 1.0f };
-	inline bool g_Visuals_BoundingBoxFilled{ true };
-	inline vec4 g_FillBox_Color{};
-
-	inline bool g_Visuals_HealthBar{ true };
-	inline vec4 g_HealthBar_Color{ .y = 1.0f, .w = 1.0f };
-}
+	vec4 g_Visuals_Snaplines_Color{ 0.840f, 0.0f, 1.0f, 1.0f };
+	vec4 g_BoundingBox_Color{ .x = 0.177f, .z = 1.0f, .w = 1.0f };
+	vec4 g_FillBox_Color{ 0.910f, 0.039f, 1.0f, 0.199f };
+	vec4 g_HealthBar_Color{ 0.0f, 1.0f, 0.818f, 1.0f };
+};
