@@ -15,7 +15,3 @@
 #include "Dependencies/GLEW/GL/glew.h"
 #include "Dependencies/GLFW/glfw3.h"
 #include "Dependencies/GLFW/glfw3native.h"
-#include "Dependencies/FreeType/ft2build.h"
-#include "Dependencies/FreeType/freetype/freetype.h"
-
-#include <map>

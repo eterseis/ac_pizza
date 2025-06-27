@@ -58,10 +58,10 @@ void Menu::LoadTheme()
 	style.WindowRounding = 3.0f;
 	style.FrameRounding = 3.0f;
 
-	ImFontConfig font_cfg;
+	/*ImFontConfig font_cfg;
 	font_cfg.FontDataOwnedByAtlas = false;
 
-	(&ImGui::GetIO())->Fonts->AddFontFromMemoryTTF(Font::GetFont(), Font::fontSize, 15.0f, &font_cfg);
+	(&ImGui::GetIO())->Fonts->AddFontFromMemoryTTF(Font::GetFont(), Font::fontSize, 15.0f, &font_cfg);*/
 }
 
 void Menu::Init(GLFWwindow* window)
@@ -97,48 +97,64 @@ void Menu::Update(float width, float height, Settings& s)
 
 			Menu::BeginContainer("##VisualsSettings");
 			ImGui::Text("ESP");
-			ImGui::Checkbox("Enabled##0", &s.g_EnableVisuals);
-			ImGui::Checkbox("Team Check", &s.g_Visuals_TeamCheck);
-			ImGui::Checkbox("Health Check", &s.g_Visuals_HealthCheck);
-			ImGui::Checkbox("Outline", &s.g_Visuals_Outline);
+			ImGui::Checkbox("Enabled##0", &s.m_EnableVisuals);
+			ImGui::Checkbox("Team Check", &s.m_Visuals_TeamCheck);
+			ImGui::Checkbox("Health Check", &s.m_Visuals_HealthCheck);
+			ImGui::Checkbox("Outline", &s.m_Visuals_Outline);
 			Menu::EndContainer("##VisualsSettings");
 
 			/*Snaplines*/
 			Menu::BeginContainer("##Snaplines");
 			ImGui::Text("Snaplines");
-			ImGui::Checkbox("Enabled##1", &s.g_Visuals_Snaplines);
+			ImGui::Checkbox("Enabled##1", &s.m_Visuals_Snaplines);
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(color_edit_pos_x);
-			ImGui::ColorEdit4("Snaplines Color", reinterpret_cast<float*>(&s.g_Visuals_Snaplines_Color), baseFlags);
+			ImGui::ColorEdit4("Snaplines Color", reinterpret_cast<float*>(&s.m_Visuals_Snaplines_Color), baseFlags);
 			Menu::EndContainer("##Snaplines");
 
 			/*BoundingBox*/
 
 			Menu::BeginContainer("##BoundingBox");
 			ImGui::Text("Bounding Box");
-			ImGui::Checkbox("Enabled##2", &s.g_Visuals_BoundingBox);
+			ImGui::Checkbox("Enabled##2", &s.m_Visuals_BoundingBox);
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(color_edit_pos_x);
-			ImGui::ColorEdit4("Bounding Box Color", reinterpret_cast<float*>(&s.g_BoundingBox_Color), baseFlags);
-			ImGui::Checkbox("Fill Box", &s.g_Visuals_BoundingBoxFilled);
+			ImGui::ColorEdit4("Bounding Box Color", reinterpret_cast<float*>(&s.m_BoundingBox_Color), baseFlags);
+			ImGui::Checkbox("Fill Box", &s.m_Visuals_BoundingBoxFilled);
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(color_edit_pos_x);
-			ImGui::ColorEdit4("Fill Box Color", reinterpret_cast<float*>(&s.g_FillBox_Color), baseFlags);
+			ImGui::ColorEdit4("Fill Box Color", reinterpret_cast<float*>(&s.m_FillBox_Color), baseFlags);
 			Menu::EndContainer("##BoundingBox");
 
 			/*Health Bar*/
 
 			Menu::BeginContainer("##HealthBar");
 			ImGui::Text("Health Bar");
-			ImGui::Checkbox("Enabled##3", &s.g_Visuals_HealthBar);
+			ImGui::Checkbox("Enabled##3", &s.m_Visuals_HealthBar);
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(color_edit_pos_x);
-			ImGui::ColorEdit4("Health Bar Color", reinterpret_cast<float*>(&s.g_HealthBar_Color), baseFlags);
+			ImGui::ColorEdit4("Health Bar Color", reinterpret_cast<float*>(&s.m_HealthBar_Color), baseFlags);
 			Menu::EndContainer("##HealthBar");
+
+			/* Name */
+			Menu::BeginContainer("##Name");
+			ImGui::Text("Name");
+			ImGui::Checkbox("Enabled##Name", &s.m_Visuals_Name);
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(color_edit_pos_x);
+			ImGui::ColorEdit4("Name Color", reinterpret_cast<float*>(&s.m_Name_Color), baseFlags);
+			Menu::EndContainer("##Name");
 			ImGui::EndTabItem();
+
 		}
 		if (ImGui::BeginTabItem("Aim", nullptr, tabItemFlags))
 		{
+			Menu::BeginContainer("##Aim");
+			ImGui::Text("Aimbot");
+			ImGui::Checkbox("Enabled##Aimbot", &s.m_EnableAim);
+			ImGui::Checkbox("Closest Entity##Aimbot", &s.m_ClosestEntity);
+			Menu::EndContainer("##Aim");
+
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Settings", nullptr, tabItemFlags))

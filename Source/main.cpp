@@ -24,10 +24,9 @@ void ForceWindowFocus(HWND window)
 	SendInput(1, &input, sizeof(INPUT));
 }
 
-/* threads */
-#pragma region
-/* reading-writing */
-void Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v)
+#pragma region THREADS
+/* MEMORY DATA READER THREAD */
+void t_Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v)
 {
 	while (s_Active)
 	{
@@ -37,7 +36,7 @@ void Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, V
 	}
 }
 
-void ProcessInput(GLFWwindow* window, Settings& s)
+void t_ProcessInput(GLFWwindow* window, Settings& s)
 {
 	using namespace std::chrono_literals;
 
@@ -51,14 +50,14 @@ void ProcessInput(GLFWwindow* window, Settings& s)
 
 		if (GetAsyncKeyState(VK_END) & 1)
 		{
-			s.g_ShowMenu = !s.g_ShowMenu;
-			(!s.g_ShowMenu) ? glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, true) : glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, false);
+			s.m_ShowMenu = !s.m_ShowMenu;
+			(!s.m_ShowMenu) ? glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, true) : glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, false);
 
 			auto hwnd_ac{ FindWindowA(nullptr, "AssaultCube") };
 			ForceWindowFocus(hwnd_ac);
 
 			std::this_thread::sleep_for(20ms);
-			if (s.g_ShowMenu)
+			if (s.m_ShowMenu)
 			{
 				ForceWindowFocus(glfwGetWin32Window(window));
 			}
@@ -67,7 +66,7 @@ void ProcessInput(GLFWwindow* window, Settings& s)
 	}
 }
 
-void OverlaySettings(GLFWwindow* window, bool& should_render)
+void t_OverlaySettings(GLFWwindow* window, bool& should_render)
 {
 	using namespace std::chrono_literals;
 
@@ -88,91 +87,38 @@ void OverlaySettings(GLFWwindow* window, bool& should_render)
 		std::this_thread::sleep_for(1ms);
 	}
 }
+
+void t_Aim(Settings& s, const Game::Entity* ents, const Game::Entity& myself)
+{
+	using namespace std::chrono_literals;
+	while (s_Active)
+	{
+		if (s.m_EnableAim)
+		{
+			if (s.m_ClosestEntity)
+			{
+				Aimbot::ClosestTarget(ents, myself);
+			}
+		}
+
+		std::this_thread::sleep_for(1ms);
+	}
+}
 #pragma endregion
 
 void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v, GLFWwindow* window, bool& should_render, Settings& s)
 {
-	std::thread puppeteer(&Puppeteer, addresses, ents, std::ref(myself), std::ref(v));
+	std::thread puppeteer(&t_Puppeteer, addresses, ents, std::ref(myself), std::ref(v));
 	puppeteer.detach();
 
-	std::thread process_input(&ProcessInput, window, std::ref(s));
+	std::thread process_input(&t_ProcessInput, window, std::ref(s));
 	process_input.detach();
 
-	std::thread overlay_settings(&OverlaySettings, window, std::ref(should_render));
+	std::thread overlay_settings(&t_OverlaySettings, window, std::ref(should_render));
 	overlay_settings.detach();
-}
 
-void FreeShit()
-{
-	struct Character
-	{
-		unsigned int TextureId;
-		vec2 Size;
-		vec2 Bearing;
-		unsigned int Advance;
-	};
-
-	static std::map<char, Character> characters;
-
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-	{
-		std::cout << "ERROR::FREETYPE: could not init library\n";
-		return;
-	}
-
-	FT_Face face;
-	if (FT_New_Face(ft, "C:/Windows/Fonts/arial.ttf", 0, &face))
-	{
-		std::cout << "ERROR::FREETYPE: failed to load font\n";
-		return;
-	}
-	FT_Set_Pixel_Sizes(face, 0, 48);
-
-	if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-	{
-		std::cout << "ERROR::FREETYPE: failed to load glyph\n";
-		return;
-	}
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	for (unsigned char c{}; c < 128; ++c)
-	{
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
-			std::cout << "ERROR::FREETYPE: failed to load glyph\n";
-			continue;
-		}
-		unsigned int texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			face->glyph->bitmap.buffer
-		);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		Character character{
-			texture,
-			{(float)face->glyph->bitmap.width, (float)face->glyph->bitmap.rows},
-			{(float)face->glyph->bitmap_left, (float)face->glyph->bitmap_top},
-			(unsigned int)face->glyph->advance.x
-		};
-		characters.insert(std::pair<char, Character>(c, character));
-	}
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
+	std::thread t_aim(&t_Aim, std::ref(s), ents, std::cref(myself));
+	t_aim.detach();
 }
 
 void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::Entity& myself, Visuals& v, Settings& settings)
@@ -236,7 +182,6 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 		settings
 	);
 
-	//FreeShit();
 	while (!glfwWindowShouldClose(window))
 	{
 		s_GlfwWindowFocused = glfwGetWindowAttrib(window, GLFW_FOCUSED);
@@ -247,24 +192,26 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 
 		if (should_render)
 		{
-			if (settings.g_ShowMenu)
+			if (settings.m_ShowMenu)
 			{
-				Menu::Update(360, 480, settings);
+				Menu::Update(360, 490, settings);
 				{
-					v.m_EnableVisuals = settings.g_EnableVisuals;
-					v.m_TeamCheck = settings.g_Visuals_TeamCheck;
-					v.m_HealthCheck = settings.g_Visuals_HealthCheck;
-					v.m_Outlined = settings.g_Visuals_Outline;
+					v.m_EnableVisuals = settings.m_EnableVisuals;
+					v.m_TeamCheck = settings.m_Visuals_TeamCheck;
+					v.m_HealthCheck = settings.m_Visuals_HealthCheck;
+					v.m_Outlined = settings.m_Visuals_Outline;
 
-					v.m_Snaplines = settings.g_Visuals_Snaplines;
-					v.m_BoundingBox = settings.g_Visuals_BoundingBox;
-					v.m_FillBox = settings.g_Visuals_BoundingBoxFilled;
-					v.m_HealthBar = settings.g_Visuals_HealthBar;
+					v.m_Snaplines = settings.m_Visuals_Snaplines;
+					v.m_BoundingBox = settings.m_Visuals_BoundingBox;
+					v.m_FillBox = settings.m_Visuals_BoundingBoxFilled;
+					v.m_HealthBar = settings.m_Visuals_HealthBar;
+					v.m_Name = settings.m_Visuals_Name;
 
-					v.m_Snaplines_Color = settings.g_Visuals_Snaplines_Color;
-					v.m_BoundingBox_Color = settings.g_BoundingBox_Color;
-					v.m_FillBox_Color = settings.g_FillBox_Color;
-					v.m_HealthBar_Color = settings.g_HealthBar_Color;
+					v.m_Snaplines_Color = settings.m_Visuals_Snaplines_Color;
+					v.m_BoundingBox_Color = settings.m_BoundingBox_Color;
+					v.m_FillBox_Color = settings.m_FillBox_Color;
+					v.m_HealthBar_Color = settings.m_HealthBar_Color;
+					v.m_Name_Color = settings.m_Name_Color;
 				}
 			}
 			v.Render(ents, myself);
@@ -310,5 +257,4 @@ int main()
 
 	CloseHandle(Globals::hProcess);
 	delete[] entities;
-	return EXIT_SUCCESS;
 }

@@ -71,26 +71,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(SolutionDir)\Source\Dependencies\FreeType;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(SolutionDir)\Source\Dependencies\FreeType\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Source\Dependencies\;$(SolutionDir)\Source\Dependencies\ImGui;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Source\Dependencies\GLFW\lib;$(SolutionDir)\Source\Dependencies\GLEW\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\bin\intermediates\</IntDir>
     <OutDir>$(SolutionDir)\bin\</OutDir>
   </PropertyGroup>
@@ -106,7 +106,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -124,7 +124,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -140,7 +140,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -158,7 +158,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
