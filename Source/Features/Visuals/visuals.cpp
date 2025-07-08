@@ -9,9 +9,6 @@
 #include "../../Dependencies/ImGui/imgui_impl_glfw.h"
 #include "../../Dependencies/ImGui/imgui_impl_opengl3.h"
 
-#include <iostream>
-#include <charconv>
-
 void Visuals::DrawLine(bool ignore_outlined, float thickness, float x, float x2, float y, float y2, float w, const vec4& color) const
 {
 	if (this->m_Outlined && !ignore_outlined)

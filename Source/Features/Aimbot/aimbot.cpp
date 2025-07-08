@@ -5,9 +5,9 @@
 #include "../../Math/math.hpp"
 #include <cmath>
 
-void Aimbot::ClosestTarget(const Game::Entity* ents, const Game::Entity& myself)
+void Aimbot::ClosestTarget(const Game::Entity* ents, const Game::Entity& myself, bool enemyOnly)
 {
-	const Game::Entity* pTarget{ Game::ClosestEntity(ents, myself) };
+	const Game::Entity* pTarget{ Game::ClosestEntity(ents, myself, enemyOnly) };
 	if (pTarget->address == myself.address) return;
 
 	constexpr float pi{ 3.14159265358979323846f };

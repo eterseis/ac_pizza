@@ -1,4 +1,4 @@
-#include "entity.h"
+#include "game.h"
 #include "../Memory/memory.hpp"
 #include "../Globals/globals.h"
 #include "offsets.hpp"
@@ -8,8 +8,7 @@ void Game::UpdateMyself(Entity& myself)
 {
 	uintptr_t address{ Offsets::GetLocalPlayer() };
 
-	Memory::rpm<Entity>(Globals::hProcess, address, myself, 784);
-	myself.dead = myself.health <= 0;
+	Memory::rpm<Entity>(Globals::hProcess, address, myself, 872);
 	myself.address = address;
 }
 
@@ -24,13 +23,12 @@ void Game::PopulateArray(uintptr_t* ents_ptr, Entity* ents)
 
 	for (unsigned int i{}; i < living_ents; ++i)
 	{
-		Memory::rpm<Game::Entity>(Globals::hProcess, ents_ptr[i], ents[i], 784);
-		ents[i].dead = ents[i].health <= 0;
+		Memory::rpm<Game::Entity>(Globals::hProcess, ents_ptr[i], ents[i], 872);
 		ents[i].address = ents_ptr[i];
 	}
 }
 
-const Game::Entity* Game::ClosestEntity(const Entity* ents, const Entity& myself)
+const Game::Entity* Game::ClosestEntity(const Entity* ents, const Entity& myself, bool enemyOnly)
 {
 	const Entity* closest_entity{ &myself };
 	float closest_distance{ static_cast<float>(0xBADF00D) };
@@ -39,6 +37,7 @@ const Game::Entity* Game::ClosestEntity(const Entity* ents, const Entity& myself
 
 	for (unsigned int i{ 0 }; i < living_ents; ++i)
 	{
+		if (enemyOnly && ents[i].team == myself.team) continue;
 		if (ents[i].dead) continue;
 
 		float distance{ Math::DistanceFrom(ents[i].vFeet, myself.vFeet) };

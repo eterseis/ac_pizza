@@ -1,8 +1,11 @@
 #include "Memory/memory.hpp"
-#include "Game/entity.h"
+#include "Game/game.h"
 #include "Globals/globals.h"
+
 #include "Features/Aimbot/aimbot.h"
 #include "Features/Visuals/visuals.hpp"
+#include "Features/Misc/misc.hpp"
+
 #include "Math/math.hpp"
 #include "Game/offsets.hpp"
 #include "Menu/menu.h"

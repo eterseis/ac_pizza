@@ -32,6 +32,7 @@ void Menu::LoadTheme()
 	ImVec4 dark{ 11 / 255.0f, 11 / 255.0f, 11 / 255.0f, 1.0f };
 	ImVec4 pink{ 222 / 255.0f, 49 / 255.0f, 99 / 255.0f, 1.0f };
 	ImVec4 light_gray{ gray.x, gray.y, gray.z, 0.5f };
+	ImVec4 light_pink{ pink.x, pink.y, pink.z, 0.8f };
 	ImVec4 no_background{};
 
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -54,14 +55,17 @@ void Menu::LoadTheme()
 	colors[ImGuiCol_ButtonHovered] = dark;
 	colors[ImGuiCol_ButtonActive] = pink;
 
+	colors[ImGuiCol_SliderGrabActive] = pink;
+	colors[ImGuiCol_SliderGrab] = light_pink;
+
 	style.WindowPadding = ImVec2(4.0f, 4.0f);
 	style.WindowRounding = 3.0f;
 	style.FrameRounding = 3.0f;
 
-	/*ImFontConfig font_cfg;
+	ImFontConfig font_cfg;
 	font_cfg.FontDataOwnedByAtlas = false;
 
-	(&ImGui::GetIO())->Fonts->AddFontFromMemoryTTF(Font::GetFont(), Font::fontSize, 15.0f, &font_cfg);*/
+	(&ImGui::GetIO())->Fonts->AddFontFromMemoryTTF(Font::GetFont(), Font::fontSize, 15.0f, &font_cfg);
 }
 
 void Menu::Init(GLFWwindow* window)
@@ -152,11 +156,52 @@ void Menu::Update(float width, float height, Settings& s)
 			Menu::BeginContainer("##Aim");
 			ImGui::Text("Aimbot");
 			ImGui::Checkbox("Enabled##Aimbot", &s.m_EnableAim);
+			ImGui::Checkbox("Enabled##EnemyOnly", &s.m_Aim_EnemyOnly);
 			ImGui::Checkbox("Closest Entity##Aimbot", &s.m_ClosestEntity);
 			Menu::EndContainer("##Aim");
 
 			ImGui::EndTabItem();
 		}
+
+		if (ImGui::BeginTabItem("Misc", nullptr, tabItemFlags))
+		{
+			Menu::BeginContainer("##ClientMods");
+			ImGui::Text("Client Mods");
+			ImGui::Checkbox("Enabled##ClientMods", &s.m_Misc_ClientMods);
+			Menu::EndContainer("##ClientMods");
+
+			Menu::BeginContainer("##Client_Mods");
+			ImGui::Text("Unlimited Health");
+			ImGui::Checkbox("Enabled##UnlimitedHealth", &s.m_Misc_UnlimitedHealth);
+
+			ImGui::Text("Max Armor");
+			ImGui::Checkbox("Enabled##MaxArmor", &s.m_Misc_MaxArmor);
+			Menu::EndContainer("##Client_Mods");
+
+
+			Menu::BeginContainer("##WeaponMods");
+			ImGui::Text("Weapon Mods");
+			ImGui::Checkbox("Enabled##WeaponMods", &s.m_Misc_WeaponMods);
+			Menu::EndContainer("##WeaponMods");
+
+			Menu::BeginContainer("##Weapon_Mods");
+			ImGui::Text("Unlimited Ammo");
+			ImGui::Checkbox("Enabled##UnlimitedAmmo", &s.m_Misc_UnlimitedAmmo);
+
+			ImGui::Text("Unlimited Magazine");
+			ImGui::Checkbox("Enabled##UnlimitedMagazine", &s.m_Misc_UnlimitedMagazine);
+
+
+			ImGui::Text("RapidFire");
+			ImGui::Checkbox("Enabled##RapidFire", &s.m_Misc_RapidFire);
+			ImGui::SetNextItemWidth(150.0f);
+			ImGui::SliderInt("##delay", &s.m_RapidFire_Value, 0, 60);
+
+			Menu::EndContainer("##Weapon_Mods");
+
+			ImGui::EndTabItem();
+		}
+
 		if (ImGui::BeginTabItem("Settings", nullptr, tabItemFlags))
 		{
 			Menu::BeginContainer("##Settings");
@@ -191,6 +236,7 @@ void Menu::Update(float width, float height, Settings& s)
 
 			ImGui::EndTabItem();
 		}
+
 		ImGui::EndTabBar();
 	}
 

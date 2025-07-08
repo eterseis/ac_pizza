@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Game/entity.h"
+#include "../../Game/game.h"
 
 class Visuals
 {

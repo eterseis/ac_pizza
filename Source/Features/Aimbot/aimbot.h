@@ -1,7 +1,7 @@
 #pragma once
-#include "../../Game/entity.h"
+#include "../../Game/game.h"
 
 namespace Aimbot
 {
-	void ClosestTarget(const Game::Entity* ents, const Game::Entity& myself);
+	void ClosestTarget(const Game::Entity* ents, const Game::Entity& myself, bool enemyOnly);
 }

@@ -19,7 +19,19 @@ public:
 	bool m_Visuals_Name{ false };
 
 	bool m_EnableAim{ false };
+	bool m_Aim_EnemyOnly{ false };
 	bool m_ClosestEntity{ false };
+
+	bool m_Misc_ClientMods{ false };
+	bool m_Misc_UnlimitedHealth{ false };
+	bool m_Misc_MaxArmor{ false };
+
+	bool m_Misc_WeaponMods{ false };
+	bool m_Misc_UnlimitedAmmo{ false };
+	bool m_Misc_UnlimitedMagazine{ false };
+	bool m_Misc_RapidFire{ false };
+	int m_RapidFire_Value{};
+
 
 	vec4 m_Visuals_Snaplines_Color{ 0.840f, 0.0f, 1.0f, 1.0f };
 	vec4 m_BoundingBox_Color{ .x = 0.177f, .z = 1.0f, .w = 1.0f };

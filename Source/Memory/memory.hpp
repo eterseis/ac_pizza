@@ -23,7 +23,13 @@ namespace Memory
 	}
 
 	template <typename T>
-	void wpm(HANDLE hProc, uintptr_t address, T& buffer)
+	void wpm(HANDLE hProc, uintptr_t address, const T& buffer)
+	{
+		::WriteProcessMemory(hProc, reinterpret_cast<LPVOID>(address), &buffer, sizeof(buffer), nullptr);
+	}
+
+	template <typename T>
+	void wpm(HANDLE hProc, void* address, const T& buffer)
 	{
 		::WriteProcessMemory(hProc, reinterpret_cast<LPVOID>(address), &buffer, sizeof(buffer), nullptr);
 	}

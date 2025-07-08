@@ -171,8 +171,9 @@
     <ClCompile Include="Source\Dependencies\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Source\Dependencies\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Source\Features\Aimbot\aimbot.cpp" />
+    <ClCompile Include="Source\Features\Misc\misc.cpp" />
     <ClCompile Include="Source\Features\Visuals\visuals.cpp" />
-    <ClCompile Include="Source\Game\entity.cpp" />
+    <ClCompile Include="Source\Game\game.cpp" />
     <ClCompile Include="Source\Game\offsets.cpp" />
     <ClCompile Include="Source\Globals\settings.cpp" />
     <ClCompile Include="Source\main.cpp">
@@ -218,8 +219,9 @@
     <ClInclude Include="Source\Dependencies\ImGui\imstb_textedit.h" />
     <ClInclude Include="Source\Dependencies\ImGui\imstb_truetype.h" />
     <ClInclude Include="Source\Features\Aimbot\aimbot.h" />
+    <ClInclude Include="Source\Features\Misc\misc.hpp" />
     <ClInclude Include="Source\Features\Visuals\visuals.hpp" />
-    <ClInclude Include="Source\Game\entity.h" />
+    <ClInclude Include="Source\Game\game.h" />
     <ClInclude Include="Source\Game\offsets.hpp" />
     <ClInclude Include="Source\Game\vector.h" />
     <ClInclude Include="Source\Globals\globals.h" />

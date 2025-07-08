@@ -25,12 +25,14 @@ void ForceWindowFocus(HWND window)
 }
 
 #pragma region THREADS
-/* MEMORY DATA READER THREAD */
-void t_Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v)
+/* ESSENTIAL ENTITY DATA READER THREAD */
+void t_Puppeteer(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Game::CurrentWeapon& cWeapon, Visuals& v)
 {
 	while (s_Active)
 	{
 		Game::UpdateMyself(myself);
+		Memory::rpm<Game::CurrentWeapon>(Globals::hProcess, reinterpret_cast<uintptr_t>(myself.currentWeaponPtr), cWeapon);
+
 		Game::PopulateArray(addresses, ents);
 		Memory::rpm<float[16]>(Globals::hProcess, Offsets::GetViewMatrix(), v.m_Matrix);
 	}
@@ -88,7 +90,7 @@ void t_OverlaySettings(GLFWwindow* window, bool& should_render)
 	}
 }
 
-void t_Aim(Settings& s, const Game::Entity* ents, const Game::Entity& myself)
+void t_Aim(const Settings& s, const Game::Entity* ents, const Game::Entity& myself)
 {
 	using namespace std::chrono_literals;
 	while (s_Active)
@@ -97,18 +99,59 @@ void t_Aim(Settings& s, const Game::Entity* ents, const Game::Entity& myself)
 		{
 			if (s.m_ClosestEntity)
 			{
-				Aimbot::ClosestTarget(ents, myself);
+				Aimbot::ClosestTarget(ents, myself, s.m_Aim_EnemyOnly);
 			}
 		}
 
 		std::this_thread::sleep_for(1ms);
 	}
 }
+
+void t_Misc(const Settings& s, const Game::Entity& myself, const Game::CurrentWeapon& cWeapon)
+{
+	using namespace std::chrono_literals;
+
+	Misc misc{};
+	while (s_Active)
+	{
+		misc.entity = reinterpret_cast<Game::Entity*>(myself.address);
+		misc.currentWeapon = cWeapon.weaponPtr;
+		if (s.m_Misc_ClientMods)
+		{
+			if (s.m_Misc_UnlimitedHealth)
+			{
+				misc.UnlimitedHealth();
+			}
+			if (s.m_Misc_MaxArmor)
+			{
+				misc.MaxArmor();
+			}
+		}
+
+		if (s.m_Misc_WeaponMods)
+		{
+			if (s.m_Misc_UnlimitedAmmo)
+			{
+				misc.UnlimitedAmmo();
+			}
+			if (s.m_Misc_UnlimitedMagazine)
+			{
+				misc.UnlimitedMagazine();
+			}
+			if (s.m_Misc_RapidFire)
+			{
+				misc.RapidFire(s.m_RapidFire_Value);
+			}
+		}
+		std::this_thread::sleep_for(5ms);
+	}
+}
+
 #pragma endregion
 
-void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Visuals& v, GLFWwindow* window, bool& should_render, Settings& s)
+void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& myself, Game::CurrentWeapon& cWeapon, Visuals& v, GLFWwindow* window, bool& should_render, Settings& s)
 {
-	std::thread puppeteer(&t_Puppeteer, addresses, ents, std::ref(myself), std::ref(v));
+	std::thread puppeteer(&t_Puppeteer, addresses, ents, std::ref(myself), std::ref(cWeapon), std::ref(v));
 	puppeteer.detach();
 
 	std::thread process_input(&t_ProcessInput, window, std::ref(s));
@@ -117,11 +160,14 @@ void LaunchThreads(uintptr_t* addresses, Game::Entity* ents, Game::Entity& mysel
 	std::thread overlay_settings(&t_OverlaySettings, window, std::ref(should_render));
 	overlay_settings.detach();
 
-	std::thread t_aim(&t_Aim, std::ref(s), ents, std::cref(myself));
+	std::thread t_aim(&t_Aim, std::cref(s), ents, std::cref(myself));
 	t_aim.detach();
+
+	std::thread t_misc(&t_Misc, std::cref(s), std::cref(myself), std::cref(cWeapon));
+	t_misc.detach();
 }
 
-void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::Entity& myself, Visuals& v, Settings& settings)
+void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::Entity& myself, Game::CurrentWeapon& cWeapon, Visuals& v, Settings& settings)
 {
 	if (!glfwInit())
 	{
@@ -176,6 +222,7 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 		const_cast<uintptr_t*>(addresses),
 		const_cast<Game::Entity*>(ents),
 		const_cast<Game::Entity&>(myself),
+		const_cast<Game::CurrentWeapon&>(cWeapon),
 		v,
 		window,
 		should_render,
@@ -215,6 +262,7 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 				}
 			}
 			v.Render(ents, myself);
+			//ImGui::ShowDemoWindow();
 		}
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -234,6 +282,8 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 
 int main()
 {
+	constexpr auto somethingForYou = R"("Please... Do not give up, it's still possible")";
+
 	auto procId = Memory::GetProcessId("ac_client.exe");
 	Globals::module_base = reinterpret_cast<uintptr_t>(Memory::GetModuleBaseAddress("ac_client.exe", procId));
 	Globals::hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | SYNCHRONIZE, false, procId);
@@ -250,10 +300,12 @@ int main()
 	uintptr_t entityAddresses[31];
 	Game::Entity* entities = new Game::Entity[31];
 	Game::Entity myself;
+	Game::CurrentWeapon cWeapon;
+
 	Visuals v{};
 	Settings settings{};
 
-	Overlay(entityAddresses, entities, myself, v, settings);
+	Overlay(entityAddresses, entities, myself, cWeapon, v, settings);
 
 	CloseHandle(Globals::hProcess);
 	delete[] entities;
