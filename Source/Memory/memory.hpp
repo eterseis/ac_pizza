@@ -7,8 +7,8 @@
 
 namespace Memory
 {
-	DWORD GetProcessId(const char* proc);
-	BYTE* GetModuleBaseAddress(const char* proc, DWORD id);
+	DWORD GetProcessId(const char* procName);
+	BYTE* GetModuleBaseAddress(const char* modName, DWORD procId);
 
 	template <typename T>
 	void rpm(HANDLE hProc, uintptr_t address, T& buffer, SIZE_T size = sizeof(T))
@@ -31,6 +31,6 @@ namespace Memory
 	template <typename T>
 	void wpm(HANDLE hProc, void* address, const T& buffer)
 	{
-		::WriteProcessMemory(hProc, reinterpret_cast<LPVOID>(address), &buffer, sizeof(buffer), nullptr);
+		::WriteProcessMemory(hProc, address, &buffer, sizeof(buffer), nullptr);
 	}
 }

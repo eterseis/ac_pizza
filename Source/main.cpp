@@ -171,7 +171,7 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 {
 	if (!glfwInit())
 	{
-		MessageBoxA(nullptr, "failed to initialize glfw", "mozart.dead", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "failed to initialize glfw", "where is my mind", MB_OK | MB_ICONERROR);
 		return;
 	}
 
@@ -191,7 +191,7 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 
 	if (!window)
 	{
-		MessageBoxA(nullptr, "failed to create window", "mozart.dead", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "failed to create window", "where is my mind", MB_OK | MB_ICONERROR);
 		glfwTerminate();
 		return;
 	}
@@ -210,7 +210,7 @@ void Overlay(const uintptr_t* addresses, const Game::Entity* ents, const Game::E
 
 	if (glewInit() != GLEW_OK)
 	{
-		MessageBoxA(nullptr, "failed to initialize glew", "mozart.dead", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "failed to initialize glew", "where is my mind", MB_OK | MB_ICONERROR);
 		return;
 	}
 
@@ -293,7 +293,7 @@ int main()
 	freopen_s(&s, "CONOUT$", "w", stdout);
 	if (!Globals::hProcess)
 	{
-		MessageBoxA(0, "unable to find assault cube", "mozart.dead", MB_OK | MB_ICONERROR);
+		MessageBoxA(0, "unable to find assault cube", "where is my mind", MB_OK | MB_ICONERROR);
 		return EXIT_FAILURE;
 	}
 

@@ -89,7 +89,7 @@ void Menu::Update(float width, float height, Settings& s)
 {
 	static ImVec2 btn_size{ 70.0f, 20.0f };
 	ImGui::SetNextWindowSize({ width, height });
-	ImGui::Begin("mozart.dead", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+	ImGui::Begin("where is my mind", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
 	static ImGuiTabItemFlags tabItemFlags{ ImGuiTabItemFlags_NoReorder | ImGuiTabItemFlags_NoTooltip | ImGuiTabItemFlags_NoCloseWithMiddleMouseButton };
 	if (ImGui::BeginTabBar("myTabBar", ImGuiTabBarFlags_NoTooltip))
@@ -156,7 +156,7 @@ void Menu::Update(float width, float height, Settings& s)
 			Menu::BeginContainer("##Aim");
 			ImGui::Text("Aimbot");
 			ImGui::Checkbox("Enabled##Aimbot", &s.m_EnableAim);
-			ImGui::Checkbox("Enabled##EnemyOnly", &s.m_Aim_EnemyOnly);
+			ImGui::Checkbox("Enemy Only##EnemyOnly", &s.m_Aim_EnemyOnly);
 			ImGui::Checkbox("Closest Entity##Aimbot", &s.m_ClosestEntity);
 			Menu::EndContainer("##Aim");
 
